@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chatgpt-invoice-agent"
+version = "0.1.0"
+description = "Idempotent ChatGPT invoice archiving and Gmail forwarding helper."
+requires-python = ">=3.11"
+dependencies = [
+  "pypdf>=5.0,<7",
+  "tzdata>=2025.2",
+  "keyring>=25,<26; sys_platform == 'darwin'",
+]
+
+[project.scripts]
+chatgpt-invoice-agent = "chatgpt_invoice_agent.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

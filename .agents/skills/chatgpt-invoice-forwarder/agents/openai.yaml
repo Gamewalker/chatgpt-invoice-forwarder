@@ -1,0 +1,4 @@
+interface:
+  display_name: "ChatGPT-Rechnungen versenden"
+  short_description: "Versendet ChatGPT-Rechnungen unter Windows und macOS"
+  default_prompt: "Use $chatgpt-invoice-forwarder to process and send the newest ChatGPT invoice exactly once."

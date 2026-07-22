@@ -1,0 +1,12 @@
+{
+  "sender": "Niels.Welsch@raiva.io",
+  "recipient": "Niels.Welsch@raiva.io",
+  "filename_name": "Niels Welsch",
+  "billing_day": 3,
+  "retry_offsets_days": [1, 2, 3],
+  "run_time": "08:00",
+  "timezone": "Europe/Berlin",
+  "archive_dir": "runtime/archive",
+  "state_file": "runtime/state.json",
+  "downloads_dir": "~/Downloads"
+}
