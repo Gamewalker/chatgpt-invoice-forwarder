@@ -16,7 +16,7 @@ Die neueste ChatGPT-Rechnung aus einer bestehenden Chrome-Sitzung abrufen und ü
 
 ## Rechnung verarbeiten
 
-1. Den betriebssystemspezifischen Helfer mit `guard` ausführen. Außerhalb des konfigurierten Prüftags ohne Browserzugriff sauber beenden.
+1. Den betriebssystemspezifischen Helfer mit `guard` ausführen. Nur bei `run_required: true` fortfahren; andernfalls ohne Browserzugriff sauber beenden. Der lokale Monats-Schalter wird erst durch eine erfolgreich versendete Rechnung geschlossen, damit verpasste oder fehlgeschlagene Läufe stündlich erneut versucht werden können.
 2. Eine bestehende ChatGPT-Registerkarte in Chrome verwenden oder `https://chatgpt.com/` öffnen. Die Sitzung mit einem kurzen Rechnungsnamen benennen.
 3. Über sichtbare UI und einen frischen DOM-Snapshot zu **Einstellungen → Abrechnung** navigieren. Keine Selektoren raten und vor jeder Interaktion Eindeutigkeit prüfen.
 4. Aus dem Abrechnungsbereich den neuesten bezahlten Rechnungseintrag, das Rechnungsdatum, den Link und den aktuellen Abrechnungsnamen lesen. Nur eine Rechnung berücksichtigen, deren Datum mindestens einen Kalendertag zurückliegt.
@@ -31,8 +31,8 @@ Die genauen Befehle und Fehlerklassen in [references/operations.md](references/o
 ## Fehler behandeln
 
 - Abgelaufene Anmeldung, MFA, CAPTCHA oder fehlendes OAuth als permanent und benutzerpflichtig melden. Nicht versuchen, Anmeldedaten zu umgehen.
-- Keine Rechnung am ersten oder zweiten Prüftag als ausstehend melden und beim nächsten geplanten Lauf erneut prüfen.
-- Netzwerk-, Download- und Gmail-Ratenlimitfehler als temporär behandeln. Am letzten Prüftag einen endgültigen Fehler ausgeben.
+- Eine noch nicht verfügbare Rechnung als ausstehend melden und beim nächsten stündlichen Lauf erneut prüfen.
+- Netzwerk-, Download- und Gmail-Ratenlimitfehler als temporär behandeln und beim nächsten stündlichen Lauf erneut versuchen.
 - Validierungsfehler niemals durch Umbenennen oder Senden umgehen. Keine Datei versenden, deren PDF-Signatur, Aussteller, Datum oder Rechnungsnummer nicht bestätigt wurde.
 - Dieselbe Rechnungs-ID oder denselben PDF-Hash niemals zweimal senden.
 - Einen Fehler bei der Gmail-Gesendet-Prüfung niemals durch direkten Versand umgehen.

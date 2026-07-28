@@ -9,7 +9,7 @@ from typing import Any
 
 from .config import load_config
 from .credential_store import credential_store_for
-from .dates import is_scheduled_calendar_day
+from .dates import first_send_date, is_scheduled_calendar_day
 from .errors import (
     AuthenticationRequiredError,
     ConfigurationError,
@@ -51,7 +51,9 @@ def build_parser() -> argparse.ArgumentParser:
     status = subparsers.add_parser("status", help="Status ohne Secrets anzeigen")
     status.add_argument("--invoice-id")
 
-    guard = subparsers.add_parser("guard", help="Prüfen, ob heute ein geplanter Kalendertag ist")
+    guard = subparsers.add_parser(
+        "guard", help="Lokalen Monatsstatus prüfen und nur bei Bedarf einen Lauf freigeben"
+    )
     guard.add_argument("--today", type=date.fromisoformat)
 
     ingest = subparsers.add_parser("ingest", help="Download validieren und archivieren")
@@ -102,11 +104,31 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         return {**data, **credential_status}
     if args.command == "guard":
         today = args.today or datetime.now(config.tzinfo).date()
+        store = StateStore(config.state_file)
+        completed = store.find_sent_for_month(today.year, today.month)
+        expected_invoice_date = date(today.year, today.month, config.billing_day)
+        eligible_from = first_send_date(expected_invoice_date, config.retry_offsets_days)
+        eligible = is_scheduled_calendar_day(
+            today, config.billing_day, config.retry_offsets_days
+        )
+        run_required = eligible and completed is None
+        if completed is not None:
+            reason = "already_completed"
+        elif not eligible:
+            reason = "before_eligible_date"
+        else:
+            reason = "not_completed"
         return {
             "today": today,
-            "scheduled": is_scheduled_calendar_day(
-                today, config.billing_day, config.retry_offsets_days
-            ),
+            "month": today.strftime("%Y-%m"),
+            "eligible_from": eligible_from,
+            "eligible": eligible,
+            "completed": completed is not None,
+            "completed_invoice_id": completed[0] if completed else None,
+            "run_required": run_required,
+            "reason": reason,
+            # Für bestehende Automations-Prompts abwärtskompatibel.
+            "scheduled": run_required,
         }
     if args.command == "ingest":
         pdf_path = args.pdf.resolve() if args.pdf else None

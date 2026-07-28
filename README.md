@@ -49,4 +49,10 @@ Bestehende `gmail.send`-Anmeldungen müssen einmal erneut autorisiert werden. La
 ./.agents/skills/chatgpt-invoice-forwarder/scripts/run_helper.sh status
 ```
 
-Der geplante Codex-Lauf verwendet den Repository-Skill `$chatgpt-invoice-forwarder` am 4., 5. und 6. jedes Monats. Windows läuft um 08:00 Uhr, die lokale Mac-Automation um 08:10 Uhr Europe/Berlin.
+Der geplante Codex-Lauf wird stündlich ausgeführt, solange der Rechner an ist. Vor jeder Browseraktion prüft `guard` den lokalen Status:
+
+- Vor dem ersten zulässigen Tag des Monats wird nichts ausgeführt.
+- Sobald eine Rechnung des laufenden Monats erfolgreich versendet wurde, bleibt der Monats-Schalter bis zum nächsten Monat geschlossen.
+- Fehlgeschlagene oder verpasste Läufe schließen den Schalter nicht und werden beim nächsten stündlichen Start erneut versucht.
+
+Der erste zulässige Tag ergibt sich aus `billing_day` plus dem kleinsten Wert in `retry_offsets_days` (aktuell der 4. Kalendertag). Danach bleibt das Fenster offen, damit ein ausgeschalteter Rechner keinen Monatslauf verpassen kann.

@@ -7,11 +7,14 @@ def allowed_send_dates(invoice_date: date, retry_offsets_days: tuple[int, ...]) 
     return tuple(invoice_date + timedelta(days=offset) for offset in retry_offsets_days)
 
 
+def first_send_date(invoice_date: date, retry_offsets_days: tuple[int, ...]) -> date:
+    return invoice_date + timedelta(days=min(retry_offsets_days))
+
+
 def is_send_day(today: date, invoice_date: date, retry_offsets_days: tuple[int, ...]) -> bool:
-    return today in allowed_send_dates(invoice_date, retry_offsets_days)
+    return today >= first_send_date(invoice_date, retry_offsets_days)
 
 
 def is_scheduled_calendar_day(today: date, billing_day: int, retry_offsets_days: tuple[int, ...]) -> bool:
     expected_invoice_date = date(today.year, today.month, billing_day)
-    return today in allowed_send_dates(expected_invoice_date, retry_offsets_days)
-
+    return is_send_day(today, expected_invoice_date, retry_offsets_days)

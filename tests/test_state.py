@@ -29,6 +29,10 @@ class StateStoreTests(unittest.TestCase):
             self.assertEqual(sent["gmail_message_id"], "gmail-123")
             unchanged = store.upsert_ingested("INV-1", {"sha256": "abc"})
             self.assertEqual(unchanged["sha256"], "abc")
+            monthly = store.find_sent_for_month(2026, 7)
+            self.assertIsNotNone(monthly)
+            self.assertEqual(monthly[0], "INV-1")
+            self.assertIsNone(store.find_sent_for_month(2026, 8))
             with self.assertRaises(ValueError):
                 store.upsert_ingested("INV-1", {"sha256": "different"})
 

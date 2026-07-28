@@ -81,7 +81,7 @@ class WorkflowTests(unittest.TestCase):
             )
             store.mark_sent("INV-1", "gmail-123")
             with patch("chatgpt_invoice_agent.workflow.send_message") as gmail_send:
-                result = send_invoice(config, "INV-1", force=True, today=date(2026, 7, 22))
+                result = send_invoice(config, "INV-1", today=date(2026, 7, 22))
             self.assertTrue(result["noop"])
             self.assertEqual(result["dedupe_source"], "local_state")
             gmail_send.assert_not_called()
@@ -121,7 +121,7 @@ class WorkflowTests(unittest.TestCase):
                 patch("chatgpt_invoice_agent.workflow.find_sent_message", return_value="gmail-existing"),
                 patch("chatgpt_invoice_agent.workflow.send_message") as gmail_send,
             ):
-                result = send_invoice(config, "INV-1", force=True, today=date(2026, 7, 22))
+                result = send_invoice(config, "INV-1", today=date(2026, 7, 22))
             self.assertTrue(result["noop"])
             self.assertEqual(result["dedupe_source"], "gmail_sent")
             self.assertEqual(store.get("INV-1")["gmail_message_id"], "gmail-existing")

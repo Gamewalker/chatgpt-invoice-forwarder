@@ -3,13 +3,13 @@ from __future__ import annotations
 import hashlib
 import os
 import shutil
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from .config import AgentConfig
 from .credential_store import credential_store_for
-from .dates import is_send_day
+from .dates import first_send_date, is_send_day
 from .errors import AmbiguousDownloadError, ValidationError
 from .gmail_api import (
     build_message,
@@ -102,11 +102,10 @@ def send_invoice(config: AgentConfig, target_id: str, force: bool = False, today
     invoice_date_value = date.fromisoformat(str(record["invoice_date"]))
     local_today = today or datetime.now(config.tzinfo).date()
     if not force and not is_send_day(local_today, invoice_date_value, config.retry_offsets_days):
-        allowed = ", ".join(value.isoformat() for value in (
-            invoice_date_value + timedelta(days=offset)
-            for offset in config.retry_offsets_days
-        ))
-        raise ValidationError(f"Versand ist heute nicht vorgesehen. Erlaubte Tage: {allowed}")
+        eligible_from = first_send_date(invoice_date_value, config.retry_offsets_days)
+        raise ValidationError(
+            f"Versand ist noch nicht vorgesehen. Frühester Tag: {eligible_from.isoformat()}"
+        )
 
     attachment = Path(str(record["file_path"]))
     if not attachment.exists() or sha256_file(attachment) != record.get("sha256"):
