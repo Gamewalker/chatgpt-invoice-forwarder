@@ -45,6 +45,16 @@ class StateStore:
                 return invoice_id, deepcopy(record)
         return None
 
+    def find_sent_for_month(self, year: int, month: int) -> tuple[str, dict[str, Any]] | None:
+        target_month = f"{year:04d}-{month:02d}"
+        for invoice_id, record in self.load()["invoices"].items():
+            if (
+                record.get("status") == "sent"
+                and str(record.get("invoice_date", ""))[:7] == target_month
+            ):
+                return invoice_id, deepcopy(record)
+        return None
+
     def upsert_ingested(self, invoice_id: str, record: dict[str, Any]) -> dict[str, Any]:
         data = self.load()
         existing = data["invoices"].get(invoice_id, {})

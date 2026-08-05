@@ -66,4 +66,6 @@ Exitcodes:
 
 `--force` ausschließlich für den einmaligen, ausdrücklich autorisierten Abnahmelauf außerhalb des regulären Versandfensters verwenden.
 
-Bei parallelen Installationen Windows um 08:00 Uhr und macOS um 08:10 Uhr Europe/Berlin ausführen. Die Gmail-Prüfung verhindert Duplikate bei nacheinander gestarteten Läufen, ist aber kein atomarer Lock für sekundengleiche Starts.
+`guard` liefert ab dem ersten zulässigen Kalendertag `run_required: true`, solange im lokalen Status noch keine versendete Rechnung für den laufenden Monat steht. Nach erfolgreichem Versand liefert jeder weitere stündliche Aufruf `run_required: false` und `reason: already_completed`.
+
+Die Gmail-Prüfung verhindert Duplikate bei nacheinander gestarteten Läufen, ist aber kein atomarer Lock für sekundengleiche Starts.
